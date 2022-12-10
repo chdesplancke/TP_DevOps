@@ -1,0 +1,52 @@
+---
+- hosts: webserver
+  become: true
+  tasks:
+    - name: Edit config option
+	  lineinfile:
+	    path: /etc/ssh/sshd_config
+		regexp: "Banner"
+	    line: "Banner /etc/ssh/motd"
+    - name: Copy MOTD
+      copy:
+	    src : /home/vagrant/TP/motd
+        dest: /etc/ssh/motd
+    - name: Add informations to MOTD
+	  lineinfile:
+	    path: /etc/ssh/motd
+	    line: "Host informations :\nHostname : {{ ansible_hostname }}\nAnsible group : {{ group_names | join(', ') }}"
+	
+- hosts: all
+  become: true
+  tasks:
+    - name: Create group supervision
+      ansible.builtin.group:
+        name: supervision
+        state: present
+	- name: Create group applicative
+      ansible.builtin.group:
+        name: applicative
+        state: present
+    - name: Add the user applicative in group 'applicative'
+      ansible.builtin.user:
+        name: applicative
+        group: applicative
+    - name: Add the user supervision in group 'supervision'
+      ansible.builtin.user:
+        name: supervision
+        group: supervision
+
+- hosts: webserver
+  become: true
+  tasks:
+    - name: Add the user web in group 'applicative'
+      ansible.builtin.user:
+        name: web
+        group: applicative
+- hosts: dbserver
+  become: true
+  tasks:
+    - name: Add the dbadmin web in group 'applicative'
+      ansible.builtin.user:
+        name: dbadmin
+        group: applicative

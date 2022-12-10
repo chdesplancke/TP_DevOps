@@ -1,0 +1,9 @@
+[web]
+webserver ansible_user=root
+
+[db]
+dbserver ansible_user=root
+
+
+
+
